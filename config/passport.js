@@ -13,8 +13,8 @@ const validatePassword = require('../utils/validatePassword');
 const User            = require('../models').User;
 
 passport.use(new LocalStrategy({
-	usernameField: 'user[email]',
-	passwordField: 'user[password]',
+	usernameField: 'email',
+	passwordField: 'password',
 }, async (email, password, done) => {
 	// Recover the user
 	let user = await User.findOne({where: {email}});

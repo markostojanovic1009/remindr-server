@@ -38,48 +38,55 @@ router.post('/login', auth.optional, (req, res, next) => {
 			return next(err);
 		}
 
-		if(passportUser) {
-			const user = {
-				_id: passportUser.id,
-				email: passportUser.email,
-				name: passportUser.name,
-				surname: passportUser.surname,
-				token: generateJWT(passportUser)
-			};
-
-			return res.json({ user });
+		if(passportUser) {		
+			return res.json({ token: generateJWT(passportUser) });
 		}
-        
+		
 		return res.status(400).send(info);
 	})(req, res, next);
 });
 
-router.post('/signup', auth.optional, async (req, res /*, next*/) => {
-	const { body: { user } } = req;
+router.post('/signup', auth.optional, async (req, res, next) => {
+
+	const user = req.body;
 	const result = Joi.validate(user, userSchema);
+
 	if(result.error){
 		return res.status(422).json({
 			errors: result.error
 		});
-    }
-    try{
-        const user = await User.create(req.body);
-        return res.json({ user });
-    }catch(e){
+	}
+	
+	try
+	{
+		const user = await User.create(req.body);
+		
+		return passport.authenticate('local', { session: false }, (err, passportUser, info) => {
+			if(err) {
+				return next(err);
+			}
+	
+			if(passportUser) {
+				user.dataValues.token = generateJWT(passportUser);
+				return res.json(user);
+			}
+			
+		})(req, res, next);
+	}
+	catch(e)
+	{
+		console.log(e);
         return res.status(500).json({
 			errors: e
 		});
-    }
+	}
 });
 
 /* GET list route */
 router.get('/list', (req, res, next) => {
 
 	User.findAll().then(users => {
-
-		return res.status(200).json(
-			JSON.stringify( users )
-		);
+		return res.status(200).json(users);
 	})
 
 });
