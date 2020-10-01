@@ -1,5 +1,4 @@
 
-const uuid = require('uuid/v4');
 'use strict';
 module.exports = (sequelize, DataTypes) => {
 	let Reminder = sequelize.define('Reminder', {
@@ -12,7 +11,14 @@ module.exports = (sequelize, DataTypes) => {
 		title: DataTypes.STRING,
         description: DataTypes.STRING,
         time: DataTypes.BIGINT
-	});
-    
+    });
+        
+    Reminder.associate = function(models) {
+        Reminder.belongsToMany(models.User, {
+            through: 'UserReminder',
+            as: 'users'
+        });
+    }
+
 	return Reminder;
 };

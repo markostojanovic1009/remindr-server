@@ -36,6 +36,12 @@ module.exports = (sequelize, DataTypes) => {
 			}
 		]
 	});
+
+	User.associate = function(models) {
+        User.belongsToMany(models.Reminder, {
+            through: 'UserReminder'
+        });
+    }
     
 	return User;
 };
